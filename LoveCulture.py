@@ -15,28 +15,20 @@ class Application(object):
         self.root.geometry("450x650")
         self.root.resizable(width=False, height=False)
         self.control = None #控制线程
-        self.widthScale = 0 #宽度倍数
-        self.heightScale = 0 #高度倍数
 
         #各个初始化数据的int类型
         self.estimateTimeVal = None
-        self.widthVal = None
-        self.heightVal = None
         self.loopTimeVal = None
 
         self.slogan = tk.Label(self.root,text = "痒痒鼠自己玩游戏",font=('Arial', 20), width=100, height=2)
         self.hint =  tk.Label(self.root,text = "预计时间最好比实际所用时间多5-10秒",font=('Arial', 12), width=100, height=2)
         self.estimate_label = tk.Label(self.root, text='预计时间')
-        self.width_label = tk.Label(self.root, text='宽度')
-        self.height_label = tk.Label(self.root, text='高度')
         self.loop_label = tk.Label(self.root, text='次数')
         self.logging_label = tk.Label(self.root, text='日志信息')
         self.captain_label = tk.Label(self.root, text = "是否队长")
         self.model_label = tk.Label(self.root, text="模式选择")
 
         self.estimateTime = tk.Entry(self.root, width=5)
-        self.width = tk.Entry(self.root, width=5)
-        self.height = tk.Entry(self.root, width=5)
         self.loopTime = tk.Entry(self.root, width=5)
 
         #是否为队长
@@ -66,8 +58,6 @@ class Application(object):
         #标签信息排版
         self.estimate_label.place(x=60, y= 140)
         self.loop_label.place(x=200, y= 140)
-        self.height_label.place(x=200, y= 190)
-        self.width_label.place(x=60, y= 190)
         self.logging_label.place(x = 60, y = 360 )
         self.captain_label.place(x = 60, y = 230)
         self.model_label.place(x=60,y=270)
@@ -75,8 +65,6 @@ class Application(object):
         #输入框排版
         self.estimateTime.place(x=135, y=140)
         self.loopTime.place(x=290, y=140)
-        self.width.place(x=135, y=190)
-        self.height.place(x=290, y=190)
 
         #是否为队长单选框
         self.isCaptain.place(x = 140, y = 230)
@@ -114,8 +102,6 @@ class Application(object):
     def begin(self):
         try:
             self.estimateTimeVal = int(self.estimateTime.get())
-            self.widthVal = int(self.width.get())
-            self.heightVal = int(self.height.get())
             self.loopTimeVal = int(self.loopTime.get())
         except ValueError as e:
             pyautogui.alert("输入参数有误")
@@ -148,7 +134,7 @@ class Application(object):
 
     def captainModel(self):
         #队长副本模式
-        self.throughDungeon("fight.png")
+        self.throughDungeon("./image/fight.png")
         self.cancel_play()
 
     def notCaptainModel(self):
@@ -162,7 +148,7 @@ class Application(object):
 
     def singleModel(self):
         #单人模式普通副本，御灵，御魂，业原火
-        self.throughDungeon("start.png")
+        self.throughDungeon("./image/start.png")
         self.cancel_play()
 
     def singelModelGouLiang(self):
@@ -170,7 +156,7 @@ class Application(object):
         pass
 
     def autoClick(self, image, confidence):
-        pyautogui.screenshot('/foo.PNG', region=(0, 0, self.widthVal, self.heightVal))
+        pyautogui.screenshot('./image/foo.PNG', region=(0, 0, 1423, 843))
         location = None
         try:
             location = pyautogui.locateCenterOnScreen(image, confidence=confidence)
@@ -194,7 +180,7 @@ class Application(object):
         #合成结界卡
 
         coordinates = [(397,390),(397, 550),(397, 722)]#三张低级卡的坐标
-        pyautogui.screenshot('/foo.PNG',region=(0, 0, self.widthVal, self.heightVal))
+        pyautogui.screenshot('./image/foo.PNG',region=(0, 0, 1423, 843))
         times = int(self.loopTime.get())
         i = 0
         while i < times and not keyboard.is_pressed("alt+q"):
@@ -205,7 +191,7 @@ class Application(object):
                 time.sleep(0.3)
                 pyautogui.click(x1,y1,button='left')
 
-            position = pyautogui.locateCenterOnScreen("hecheng.png",confidence = 0.9) #合成按钮
+            position = pyautogui.locateCenterOnScreen("./image/hecheng.png",confidence = 0.9) #合成按钮
             pyautogui.moveTo(position[0],position[1],duration = 0.6)
             pyautogui.click(position[0]+random.randint(1, 50), position[1]+random.randint(1, 30),button='left')
             i = i+1
