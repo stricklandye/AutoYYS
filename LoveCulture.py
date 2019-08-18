@@ -85,20 +85,27 @@ class Application(object):
         self.logging.place(x = 140, y = 360)
         # self.scrollbar.place(x = 200, y = 300)
     def begin_play(self):
-        if self.control is None or self.control.stopped is True:
+        if self.control is None:
             self.control = ControlThread(target = self.begin, name = "LoveCulture")
             self.control.start()
         else:
             pyautogui.alert("刚才任务还没结束，不要老是开始！")
 
     def cancel_play(self):
-        if self.control is not None:
-            #此时任务线程不为空,那么结束线程,并且将任务线程设置为None
-            # 如果只是设置为None但是不terminate,造成线程过多
+        if self.control is None:
+            pyautogui.alert("还没开始就不要想着结束")
+        else:
             self.control.terminate()
             self.control = None
             self.logging.insert(tk.END, "\n任务结束\n")
             self.logging.see(tk.END)
+        # if self.control is not None:
+        #     #此时任务线程不为空,那么结束线程,并且将任务线程设置为None
+        #     # 如果只是设置为None但是不terminate,造成线程过多
+        #     self.control.terminate()
+        #     self.control = None
+        #     self.logging.insert(tk.END, "\n任务结束\n")
+        #     self.logging.see(tk.END)
     def begin(self):
         try:
             self.estimateTimeVal = int(self.estimateTime.get())
@@ -106,6 +113,7 @@ class Application(object):
         except ValueError as e:
             pyautogui.alert("输入参数有误")
             self.cancel_play()
+            return
 
         modes = ['御魂', '业原火', '御灵', '合卡']
         captain = self.captain.get()
@@ -222,7 +230,7 @@ class Application(object):
                 time.sleep(1)
             self.logging.insert(tk.END, "\n副本次数:{times}，结束!".format(times=count+1))
             count = count+1
-
+# 
 class ControlThread(threading.Thread):
     #任务控制线程,每次点击开始按钮创建一个新的线程
     def __init__(self,target,name):
