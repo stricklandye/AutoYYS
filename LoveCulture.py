@@ -1,22 +1,28 @@
+import ctypes
 import random
 import threading
 import tkinter as tk
 from tkinter import scrolledtext
 
+import cv2
 import keyboard
 import pyautogui
 import time
 
 
 class Application(object):
+
+
+
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("热爱中国传统文化")
-        self.root.geometry("450x650")
+        self.root.geometry("500x650")
         self.root.resizable(width=False, height=False)
         self.control = None #控制线程
 
-        #各个初始化数据的int类型
+        self.fixedX1 = 417
+        self.fixedY1 = 139
         self.estimateTimeVal = None
         self.loopTimeVal = None
 
@@ -44,6 +50,7 @@ class Application(object):
         self.yeyuanhuo = tk.Radiobutton(self.root, text = "业原火",variable = self.model, value=2)
         self.yuling= tk.Radiobutton(self.root, text = "御灵",variable = self.model, value=3,)
         self.jiejieka= tk.Radiobutton(self.root, text = "合卡",variable = self.model, value=4,)
+        self.tupo = tk.Radiobutton(self.root, text="突破", variable=self.model, value=5, )
         self.yuhun.select()
 
         self.logging = scrolledtext.ScrolledText(self.root,width = 30, height = 15)
@@ -76,6 +83,7 @@ class Application(object):
         self.yeyuanhuo.place(x = 220, y=270)
         self.yuling.place(x=300, y=270)
         self.jiejieka.place(x=380, y=270)
+        self.tupo.place(x=440,y=270)
 
         #按钮组排版
         self.begin_btn.place(x=140, y=310)
@@ -84,10 +92,12 @@ class Application(object):
         #日志排版
         self.logging.place(x = 140, y = 360)
         # self.scrollbar.place(x = 200, y = 300)
+
     def begin_play(self):
         if self.control is None:
             self.control = ControlThread(target = self.begin, name = "LoveCulture")
             self.control.start()
+            keyboard.add_hotkey("alt+q", self.cancel_play) #结束任务热键
         else:
             pyautogui.alert("刚才任务还没结束，不要老是开始！")
 
@@ -95,27 +105,21 @@ class Application(object):
         if self.control is None:
             pyautogui.alert("还没开始就不要想着结束")
         else:
-            self.control.terminate()
+            self.control.kill()
             self.control = None
             self.logging.insert(tk.END, "\n任务结束\n")
             self.logging.see(tk.END)
-        # if self.control is not None:
-        #     #此时任务线程不为空,那么结束线程,并且将任务线程设置为None
-        #     # 如果只是设置为None但是不terminate,造成线程过多
-        #     self.control.terminate()
-        #     self.control = None
-        #     self.logging.insert(tk.END, "\n任务结束\n")
-        #     self.logging.see(tk.END)
+
     def begin(self):
         try:
             self.estimateTimeVal = int(self.estimateTime.get())
             self.loopTimeVal = int(self.loopTime.get())
-        except ValueError as e:
+        except TypeError as e:
             pyautogui.alert("输入参数有误")
             self.cancel_play()
             return
 
-        modes = ['御魂', '业原火', '御灵', '合卡']
+        modes = ['御魂', '业原火', '御灵', '合卡','突破']
         captain = self.captain.get()
         model = self.model.get()
         self.logging.insert(tk.END, "\n------------------\n")
@@ -136,6 +140,8 @@ class Application(object):
             if model == 4:
                 #合成结界卡
                 self.composeCard()
+            elif model == 5:
+                self.throughTuPo()
             else:
                 #如果是御灵，御魂，业原火，执行单人普通地图模式
                 self.singleModel()
@@ -146,23 +152,86 @@ class Application(object):
         self.cancel_play()
 
     def notCaptainModel(self):
-        times = int(self.loopTime.get())
-        count = 0
-        while count < times and not keyboard.is_pressed("alt+q"):
-            #按下alt+q结束任务
-            time.sleep(2)
-            pyautogui.click(417+random.randint(20, 50), 139+random.randint(20, 50), button="left")
-        self.cancel_play()
+        #非队长模式
+        while True:
+            time.sleep(3)
+            pyautogui.click(self.fixedX1+random.randint(20, 50), self.fixedY1+random.randint(20, 50), button="left")
+
 
     def singleModel(self):
         #单人模式普通副本，御灵，御魂，业原火
         self.throughDungeon("./image/start.png")
         self.cancel_play()
 
-    def singelModelGouLiang(self):
-        #单人模式狗粮副本
-        pass
+    def throughTuPo(self):
+        #通过结界突破
+        coordinates = [(240,145),(633,170),(1017,186),
+                       (249,318),(629,323),(1011,322),
+                       (257,469),(628,474),(1010,469)]
+        count = 0
+        for cor in coordinates:
+            time.sleep(3)
+            count = count+1
+            self.logging.insert(tk.END, "\n次数:{count}".format(count = count))
+            self.logging.see(tk.END)
 
+            #在3,6这两次会出现奖励，点击鼠标
+            x3 = self.fixedX1 + random.randint(1, 50)
+            y3 = self.fixedY1 + random.randint(1, 30)
+            pyautogui.moveTo(x3,y3,duration=0.8)
+            pyautogui.click(x3,y3,button='left')
+
+            x1 = cor[0]+random.randint(10,180)
+            y1 = cor[1]+random.randint(5,70)
+            pyautogui.moveTo(x1,y1,duration=0.8)
+            time.sleep(1)
+            pyautogui.click(x1,y1,button='left')
+            #寻找进攻按钮
+            pyautogui.screenshot('./image/foo.PNG', region=(0, 0, 1423, 843))
+            location = None
+            try:
+                location = pyautogui.locateCenterOnScreen("./image/attack.png", confidence=0.8)
+            except TypeError as e:
+                self.logging.insert(tk.END, "\n这个已经打过了!")
+                self.logging.see(tk.END)
+                #有时候会点到目标头像,所以在发送异常的时候，原地点一下
+                pyautogui.click(button='left')
+                continue
+
+            x3 = location[0] + random.randint(1, 50)
+            y3 = location[1] + random.randint(1, 30)
+            pyautogui.moveTo(x=x3, y=y3, duration=0.7)
+            pyautogui.click(x=x3, y=y3, button='left')
+            time.sleep(self.estimateTimeVal)
+            while True:
+                pyautogui.screenshot("./image/foo.png")
+                if self.match("./image/foo.png","./image/victory.png"):
+                    pyautogui.click(button='left')
+                    break
+                else:
+                    #如果没有匹配，等待10秒
+                    time.sleep(10)
+        self.cancel_play()
+    def match(self,img,template):
+        img_src = cv2.imread(img)
+        gary_img = cv2.cvtColor(img_src, cv2.COLOR_RGB2GRAY)
+
+        template_src = cv2.imread(template)
+        gary_temp = cv2.cvtColor(template_src, cv2.COLOR_RGB2GRAY)
+
+        result = cv2.matchTemplate(gary_img, gary_temp, cv2.TM_CCOEFF_NORMED)
+
+        '''
+        min_val,max_val:result矩阵中的最大值以及最小值,如果不匹配min_val接近-1，匹配的区域max_val接近1
+        min_loc,max_loc:min_val,max_val在result矩阵中的坐标,因此max_val为匹配区域的左上角坐标
+        '''
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        thresh_val = 0.8 #如果成功匹配到目标,max_val的值会接近于1
+        # if max_val > thresh_val:
+            #max_loc为左上角坐标，因此加上一半的宽高，就是中心点坐标
+            # x1 = max_loc[0]+width/2
+            # y1 = max_loc[1]+height/2
+        return max_val > thresh_val #大于thresh_val,说明存在匹配区域
     def autoClick(self, image, confidence):
         pyautogui.screenshot('./image/foo.PNG', region=(0, 0, 1423, 843))
         location = None
@@ -175,26 +244,25 @@ class Application(object):
                 #这里发生异常的原因有时候是在结束副本的时候
                 #由于网络不好，一直在转转转，没有跳转到挑战页面
                 #因此发生这种情况重复点击页面，一旦恢复可以跳转
-                pyautogui.click(417+random.randint(20, 50), 139+random.randint(20, 50), button="left")
+                pyautogui.click(self.fixedX1+random.randint(20, 50), self.fixedY1+random.randint(20, 50), button="left")
                 time.sleep(1)
             location = pyautogui.locateCenterOnScreen(image, confidence=confidence)
 
-        startX = location[0] + random.randint(1, 50)
-        startY = location[1] + random.randint(1, 30)
-        pyautogui.moveTo(x=startX, y=startY, duration=0.7)
-        pyautogui.click(x=startX, y=startY, button='left')
+        x1 = location[0] + random.randint(1, 50)
+        y1 = location[1] + random.randint(1, 30)
+        pyautogui.moveTo(x= x1, y= y1, duration=0.7)
+        pyautogui.click(x= x1, y= y1, button='left')
 
     def composeCard(self):
         #合成结界卡
 
         coordinates = [(397,390),(397, 550),(397, 722)]#三张低级卡的坐标
         pyautogui.screenshot('./image/foo.PNG',region=(0, 0, 1423, 843))
-        times = int(self.loopTime.get())
         i = 0
-        while i < times and not keyboard.is_pressed("alt+q"):
+        while i < self.loopTimeVal :
             for cor in coordinates:
                 x1 = cor[0]+random.randint(20,200)
-                y1 = cor[1]+random.randint(20,100)
+                y1 = cor[1]+random.randint(1,70)
                 pyautogui.moveTo(x1, y1 ,duration=0.7)
                 time.sleep(0.3)
                 pyautogui.click(x1,y1,button='left')
@@ -212,38 +280,35 @@ class Application(object):
         :param btn:
         :return:
         """
-        times = int(self.loopTime.get())
-        estimateTime = int(self.estimateTime.get())
 
         count = 0
-        while self.control is not  None and count < times:
-            #当控制线程为None时，停止任务
+        while  count < self.loopTimeVal:
+
             self.logging.insert(tk.END, "\n第{times}次开始!".format(times=count + 1))
             self.logging.see(tk.END)
 
             time.sleep(5)
-            self.autoClick(btn, 0.7)
-            time.sleep(estimateTime)
+            self.autoClick(btn, 0.7) #寻找开始副本的按钮
+            time.sleep(self.estimateTimeVal)
             for i in range(7):
                 #结束后重复点击页面,结束到御魂掉落界面的等待时间。
-                pyautogui.click(417+random.randint(20, 50), 139+random.randint(20, 50), button="left")
+                pyautogui.click(self.fixedX1+random.randint(20, 50), self.fixedX1+random.randint(20, 50), button="left")
                 time.sleep(1)
             self.logging.insert(tk.END, "\n副本次数:{times}，结束!".format(times=count+1))
             count = count+1
-# 
+#
 class ControlThread(threading.Thread):
     #任务控制线程,每次点击开始按钮创建一个新的线程
     def __init__(self,target,name):
         self._stop_event = threading.Event()
         threading.Thread.__init__(self,target = target,name = name)
 
-    def terminate(self):
-        #标志位设置为False,停止线程
-        self._stop_event.set()
+    #杀死线程
+    def kill(self):
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            ctypes.c_long(self.ident),ctypes.py_object(SystemExit)
+        )
 
-    def stopped(self):
-        #返回当前线程是否停止
-        return self._stop_event.is_set()
 
 def main():
     app = Application()
