@@ -15,6 +15,5 @@
 我的电脑的分辨率是：1920X1080，桌面版阴阳师打开后默认的尺寸就是1423X843,如果电脑的分辨率不同，可以使用 **QQ截图**量一下。
 
 ## GUI版
-网盘地址:https://pan.baidu.com/s/1UwxGYTBvbHCSODcHlmpebg 提取码:h9y4
-使用**管理员模式**打开dist目录下的**LoveCulture.exe**，设置好参数即可
+目前还在添加新功能，GUI版本暂时不更新
 
