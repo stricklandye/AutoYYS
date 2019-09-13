@@ -25,6 +25,7 @@ class Application(object):
         self.fixedY1 = 139
         self.estimateTimeVal = None
         self.loopTimeVal = None
+        self.isBegin = False
 
         self.slogan = tk.Label(self.root,text = "痒痒鼠自己玩游戏",font=('Arial', 20), width=100, height=2)
         self.hint =  tk.Label(self.root,text = "预计时间最好比实际所用时间多5-10秒",font=('Arial', 12), width=100, height=2)
@@ -94,7 +95,8 @@ class Application(object):
         # self.scrollbar.place(x = 200, y = 300)
 
     def begin_play(self):
-        if self.control is None:
+        if self.isBegin is False:
+            self.isBegin = True
             self.control = ControlThread(target = self.begin, name = "LoveCulture")
             self.control.start()
             keyboard.add_hotkey("alt+q", self.cancel_play) #结束任务热键
@@ -102,19 +104,19 @@ class Application(object):
             pyautogui.alert("刚才任务还没结束，不要老是开始！")
 
     def cancel_play(self):
-        if self.control is None:
+        if self.isBegin is False:
             pyautogui.alert("还没开始就不要想着结束")
         else:
-            self.control.kill()
-            self.control = None
+            self.isBegin = False
             self.logging.insert(tk.END, "\n任务结束\n")
             self.logging.see(tk.END)
+            self.control.kill()
 
     def begin(self):
         try:
             self.estimateTimeVal = int(self.estimateTime.get())
             self.loopTimeVal = int(self.loopTime.get())
-        except TypeError as e:
+        except ValueError as e:
             pyautogui.alert("输入参数有误")
             self.cancel_play()
             return
@@ -264,6 +266,9 @@ class Application(object):
         pyautogui.screenshot('./image/foo.PNG',region=(0, 0, 1423, 843))
         i = 0
         while i < self.loopTimeVal :
+            # print("hello world")
+            # time.sleep(1)
+            # i +=1
             for cor in coordinates:
                 x1 = cor[0]+random.randint(20,200)
                 y1 = cor[1]+random.randint(10,55)
