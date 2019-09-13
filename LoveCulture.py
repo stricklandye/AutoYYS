@@ -170,16 +170,20 @@ class Application(object):
                        (257,469),(628,474),(1010,469)]
         count = 0
         for cor in coordinates:
-            time.sleep(3)
+            time.sleep(5)
             count = count+1
             self.logging.insert(tk.END, "\n次数:{count}".format(count = count))
             self.logging.see(tk.END)
-
+            if count ==4 or count == 7:
+                x3 = 323 + random.randint(1, 50)
+                y3 = 99 + random.randint(1, 10)
+                pyautogui.moveTo(x3,y3,duration =0.8)
+                pyautogui.click(x3,y3, button = "left")
             #在3,6这两次会出现奖励，点击鼠标
-            x3 = self.fixedX1 + random.randint(1, 50)
-            y3 = self.fixedY1 + random.randint(1, 30)
-            pyautogui.moveTo(x3,y3,duration=0.8)
-            pyautogui.click(x3,y3,button='left')
+            # x3 = 314 + random.randint(1, 50)
+            # y3 = 57 + random.randint(1, 10)
+            # pyautogui.moveTo(x3,y3,duration=0.8)
+            # pyautogui.click(x3,y3,button='left')
 
             x1 = cor[0]+random.randint(10,180)
             y1 = cor[1]+random.randint(5,70)
@@ -256,13 +260,13 @@ class Application(object):
     def composeCard(self):
         #合成结界卡
 
-        coordinates = [(397,390),(397, 550),(397, 722)]#三张低级卡的坐标
+        coordinates = [(225,422),(269, 557),(271, 710)]#三张低级卡的坐标
         pyautogui.screenshot('./image/foo.PNG',region=(0, 0, 1423, 843))
         i = 0
         while i < self.loopTimeVal :
             for cor in coordinates:
                 x1 = cor[0]+random.randint(20,200)
-                y1 = cor[1]+random.randint(1,70)
+                y1 = cor[1]+random.randint(10,55)
                 pyautogui.moveTo(x1, y1 ,duration=0.7)
                 time.sleep(0.3)
                 pyautogui.click(x1,y1,button='left')
