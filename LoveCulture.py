@@ -301,7 +301,7 @@ class Application(object):
             time.sleep(self.estimateTimeVal)
             for i in range(7):
                 #结束后重复点击页面,结束到御魂掉落界面的等待时间。
-                pyautogui.click(self.fixedX1+random.randint(20, 50), self.fixedX1+random.randint(20, 50), button="left")
+                pyautogui.click(89+random.randint(20, 50), 413+random.randint(20, 50), button="left")
                 time.sleep(1)
             self.logging.insert(tk.END, "\n副本次数:{times}，结束!".format(times=count+1))
             count = count+1
