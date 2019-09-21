@@ -3,7 +3,7 @@
 
 ## 使用文档:
 **请务必看完文档后在使用！！**
-[点击我查看文档](https://jackgoudan.github.io/)
+[点击我查看文档](https://jackgoudan.github.io/2019/09/21/booklet/#more)
 
 ## 介绍
 - 功能：御魂，御灵，业原火，合成结界卡，个人结界突破（不是寮那边的）
